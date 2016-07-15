@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -79,6 +80,7 @@ public class EmailBackup {
                 .build();
         Credential credential = new AuthorizationCodeInstalledApp(
             flow, new LocalServerReceiver()).authorize("user");
+        System.out.println(credential.getAccessToken());
         System.out.println(
                 "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
         return credential;
@@ -119,14 +121,31 @@ public class EmailBackup {
         // Build a new authorized API client service.
         Gmail service = getGmailService();
 
+        Profile response = service.users().getProfile("me").execute();
+        String email = response.getEmailAddress();
+
+        //Get query
+        String query = "newer_than:2d";
+
         // Print the labels in the user's account.
         String user = "me";
-        List<Message> messages = listMessagesMatchingQuery(service, "me", "newer_than:2d");
+        List<Message> messages = listMessagesMatchingQuery(service, "me", query);
         if (messages.size() == 0) {
             System.out.println("No labels found.");
         } else {
             Message m = service.users().messages().get(user, messages.get(0).getId()).setFormat("raw").execute();
-            System.out.println(m.getRaw());
+            try {
+                String plaintext = Base64.getEncoder().encodeToString(m.decodeRaw());
+                String encrypted = Encryption.encrypt(email, m.decodeRaw(), m.getId());
+                String decrypted = Encryption.decrypt(email, encrypted.getBytes(), m.getId());
+
+                //System.out.println(plaintext.equals(val));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+            //System.out.println(new String(m.decodeRaw(), "UTF-8"));
         }
     }
 }
