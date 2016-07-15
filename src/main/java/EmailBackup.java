@@ -16,7 +16,9 @@ import com.google.api.services.gmail.Gmail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class EmailBackup {
@@ -44,7 +46,7 @@ public class EmailBackup {
      * at ~/.credentials/gmail-java-quickstart.json
      */
     private static final List<String> SCOPES =
-        Arrays.asList(GmailScopes.GMAIL_LABELS);
+        Arrays.asList(GmailScopes.GMAIL_READONLY);
 
     static {
         try {
@@ -94,23 +96,37 @@ public class EmailBackup {
                 .build();
     }
 
+    public static List<Message> listMessagesMatchingQuery(Gmail service, String userId,
+                                                          String query) throws IOException {
+        ListMessagesResponse response = service.users().messages().list(userId).setQ(query).execute();
+
+        List<Message> messages = new ArrayList<Message>();
+        while (response.getMessages() != null) {
+            messages.addAll(response.getMessages());
+            if (response.getNextPageToken() != null) {
+                String pageToken = response.getNextPageToken();
+                response = service.users().messages().list(userId).setQ(query)
+                        .setPageToken(pageToken).execute();
+            } else {
+                break;
+            }
+        }
+
+        return messages;
+    }
+
     public static void main(String[] args) throws IOException {
         // Build a new authorized API client service.
         Gmail service = getGmailService();
 
         // Print the labels in the user's account.
         String user = "me";
-        ListLabelsResponse listResponse =
-            service.users().labels().list(user).execute();
-        List<Label> labels = listResponse.getLabels();
-        if (labels.size() == 0) {
+        List<Message> messages = listMessagesMatchingQuery(service, "me", "newer_than:2d");
+        if (messages.size() == 0) {
             System.out.println("No labels found.");
         } else {
-            System.out.println("Labels:");
-            for (Label label : labels) {
-                System.out.printf("- %s\n", label.getName());
-            }
+            Message m = service.users().messages().get(user, messages.get(0).getId()).setFormat("raw").execute();
+            System.out.println(m.getRaw());
         }
     }
-
 }
