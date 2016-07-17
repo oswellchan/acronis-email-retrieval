@@ -37,6 +37,10 @@ public class CLI {
                     print(ERROR_INVALIDCOMMAND);
                 }
                 break;
+            case "logout":
+                commandQueue.execute(new Logout());
+                isPendingInput = false;
+                break;
             case "exit":
                 isPendingInput = false;
                 break;

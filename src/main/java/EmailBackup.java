@@ -16,12 +16,15 @@ import com.google.api.services.gmail.Gmail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class EmailBackup {
 
@@ -45,6 +48,10 @@ public class EmailBackup {
 
     /** Global instance of the HTTP transport. */
     private HttpTransport HTTP_TRANSPORT;
+
+    private String TOKEN_REVOKE_URL = "https://accounts.google.com/o/oauth2/revoke?token=";
+
+    private Credential credential = null;
 
     /** Global instance of the scopes required by this quickstart.
      *
@@ -102,7 +109,7 @@ public class EmailBackup {
      * @throws IOException
      */
     private Gmail getGmailService() throws IOException {
-        Credential credential = authorize();
+        credential = authorize();
         return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
@@ -137,12 +144,20 @@ public class EmailBackup {
         return response.getEmailAddress();
     }
 
-    private void removeCredentials() {
+    public void revokeCredentials() {
         try {
-            Path file = Paths.get(DATA_STORE_DIR + "StoredCredential");
+            URLConnection connection = new URL(TOKEN_REVOKE_URL + credential.getAccessToken()).openConnection();
+            connection.setRequestProperty("Accept-Charset", "utf-8");
+            InputStream response = connection.getInputStream();
+
+            Scanner scanner = new Scanner(response);
+            String responseBody = scanner.useDelimiter("\\A").next();
+
+            Path file = Paths.get(DATA_STORE_DIR + "\\StoredCredential");
             Files.delete(file);
+            System.out.println("Logout successful. It might take some time before the revocation has full effect.");
         } catch (Exception e) {
-            System.out.println("Unable to log out.");
+            System.out.println("Logout unsuccessful. Error: " + e.getMessage());
         }
     }
 
