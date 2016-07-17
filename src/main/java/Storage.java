@@ -1,12 +1,13 @@
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Set;
 
 public class Storage {
     private static final String mapFileName = "data.ser";
@@ -92,6 +93,11 @@ public class Storage {
         }
     }
 
+    public byte[] getBytesFromFile(String fileName) throws IOException {
+        Path path = Paths.get(fileStorePath + fileName);
+        return Files.readAllBytes(path);
+    }
+
     public void deleteFile(String fileName) {
         try {
             Path file = Paths.get(fileStorePath + fileName);
@@ -99,5 +105,9 @@ public class Storage {
         } catch (Exception e) {
             System.out.println("Unable to delete file.");
         }
+    }
+
+    public Set<String> listOfMessageIds() {
+        return msgIdToIVMap.keySet();
     }
 }

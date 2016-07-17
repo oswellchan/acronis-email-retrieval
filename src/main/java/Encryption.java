@@ -15,7 +15,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Encryption {
-    private static String salt = "salt";
+    private static String salt = "nfdm";
 
     private static SecretKey generateKey(String pw) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -40,7 +40,7 @@ public class Encryption {
         byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
         Storage.getInstance(email).updateIdToIVMap(msgId, iv);
 
-        return Base64.getEncoder().encode(ciphertext);
+        return ciphertext;
     }
 
     public static byte[] decrypt(String email, byte[] ciphertext, String msgId) throws NoSuchPaddingException,
@@ -48,13 +48,11 @@ public class Encryption {
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        byte[] val = Base64.getDecoder().decode(ciphertext);
-
         SecretKey secret = generateKey(email);
         byte[] iv = Storage.getInstance(email).getIV(msgId);
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
-        byte[] plaintext = cipher.doFinal(val);
+        byte[] plaintext = cipher.doFinal(ciphertext);
 
-        return Base64.getEncoder().encode(plaintext);
+        return plaintext;
     }
 }

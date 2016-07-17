@@ -20,7 +20,7 @@ public class CLI {
 
 
     private static void parseAndExecuteInstruction(String instruction) {
-        String[] splitArray = instruction.split(" ");
+        String[] splitArray = instruction.trim().split(" ");
         String commandType = splitArray[0];
 
         switch(commandType) {
@@ -33,6 +33,15 @@ public class CLI {
                         String newEndDate = getNewEndDate(endDate);
                         commandQueue.execute(new Get(startDate, newEndDate, userEmail));
                     }
+                } else {
+                    print(ERROR_INVALIDCOMMAND);
+                }
+                break;
+            case "decrypt":
+                if (splitArray.length == 1) {
+                    commandQueue.execute(new Decrypt(userEmail));
+                } else if (splitArray.length == 2) {
+                    commandQueue.execute(new Decrypt(splitArray[1], userEmail));
                 } else {
                     print(ERROR_INVALIDCOMMAND);
                 }

@@ -31,7 +31,6 @@ public class Get implements Command {
                 if (!mem.hasMessage(msgId)) {
                     byte[] messageInRaw = service.getMessageRaw(msgId);
                     byte[] encrypted = Encryption.encrypt(userEmail, messageInRaw, msgId);
-
                     mem.writeToFile(encrypted, msgId);
                     ids.add(msgId);
                 }
