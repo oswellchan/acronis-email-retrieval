@@ -51,6 +51,8 @@ public class EmailBackup {
 
     private String TOKEN_REVOKE_URL = "https://accounts.google.com/o/oauth2/revoke?token=";
 
+    private final String FEEDBACK_LOGOUTSUCCESS = "Logout successful. It might take some time before the revocation has full effect.";
+
     private Credential credential = null;
 
     /** Global instance of the scopes required by this quickstart.
@@ -155,35 +157,9 @@ public class EmailBackup {
 
             Path file = Paths.get(DATA_STORE_DIR + "\\StoredCredential");
             Files.delete(file);
-            System.out.println("Logout successful. It might take some time before the revocation has full effect.");
+            System.out.println(FEEDBACK_LOGOUTSUCCESS);
         } catch (Exception e) {
             System.out.println("Logout unsuccessful. Error: " + e.getMessage());
         }
     }
-
-//    public static void main(String[] args) throws IOException {
-//        //Get query
-//        String query = "newer_than:2d";
-//
-//        // Print the labels in the user's account.
-//        String user = "me";
-//        List<Message> messages = listMessagesMatchingQuery(service, "me", query);
-//        if (messages.size() == 0) {
-//            System.out.println("No labels found.");
-//        } else {
-//            Message m = service.users().messages().get(user, messages.get(0).getId()).setFormat("raw").execute();
-//            try {
-//                String plaintext = Base64.getEncoder().encodeToString(m.decodeRaw());
-//                String encrypted = Encryption.encrypt(email, m.decodeRaw(), m.getId());
-//                String decrypted = Encryption.decrypt(email, encrypted.getBytes(), m.getId());
-//
-//                //System.out.println(plaintext.equals(val));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//
-//
-//            //System.out.println(new String(m.decodeRaw(), "UTF-8"));
-//        }
-//    }
 }

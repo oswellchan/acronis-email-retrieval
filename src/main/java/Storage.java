@@ -35,7 +35,7 @@ public class Storage {
                 Files.createDirectories(userFolderPath);
             }
         } catch (Exception e) {
-            System.out.println("Unable to create user directory.");
+            System.out.println("Unable to create user directory. Error: " + e.getMessage());
             System.exit(1);
         }
     }
@@ -89,7 +89,7 @@ public class Storage {
             Path file = Paths.get(fileStorePath + fileName);
             Files.write(file, data);
         } catch (Exception e) {
-            System.out.println("Unable to write file to disk.");
+            System.out.println("Unable to write file to disk. Error: " + e.getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ public class Storage {
             Path file = Paths.get(fileStorePath + fileName);
             Files.delete(file);
         } catch (Exception e) {
-            System.out.println("Unable to delete file.");
+            System.out.println("Unable to delete file. Error: " + e.getMessage());
         }
     }
 
