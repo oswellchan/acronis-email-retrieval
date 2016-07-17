@@ -11,10 +11,11 @@ public class CLI {
     private static final String ERROR_INVALIDSTARTDATE = "Start date given is not an actual date. Please try again.";
     private static final String ERROR_INVALIDENDDATE = "End date given is not an actual date. Please try again.";
     private static final String ERROR_INVALIDDATERANGE = "Start date is later than end date. Please try again.";
-    private static final String dateRegex = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String dateRegex = "\\d{4}/\\d{2}/\\d{2}";
 
     private static EmailBackup service = null;
     private static CommandQueue commandQueue = null;
+    private static String userEmail = null;
     private static boolean isPendingInput = true;
 
 
@@ -30,7 +31,7 @@ public class CLI {
 
                     if (isValid(startDate, endDate)) {
                         String newEndDate = getNewEndDate(endDate);
-                        commandQueue.execute(new Get(startDate, newEndDate));
+                        commandQueue.execute(new Get(startDate, newEndDate, userEmail));
                     }
                 } else {
                     print(ERROR_INVALIDCOMMAND);
@@ -55,7 +56,8 @@ public class CLI {
             return false;
         }
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+        format.setLenient(false);
         Date start = null;
         try {
             start = format.parse(startDate);
@@ -86,7 +88,8 @@ public class CLI {
     * inclusive on both bounds
     */
     private static String getNewEndDate(String endDate) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+        format.setLenient(false);
         Calendar cal = Calendar.getInstance();
         Date end = null;
         try {
@@ -106,26 +109,29 @@ public class CLI {
         System.out.println(feedback);
     }
 
-    public static void main (String[] args) {
+    private static void initialiseEnvironment() {
         try {
             service = EmailBackup.getInstance();
             commandQueue = CommandQueue.getInstance();
-
-            String userEmail = service.getEmailAddress();
-            System.out.println("Logged in as: " + userEmail);
-
-            Scanner sc = new Scanner(System.in);
-
-            while (isPendingInput) {
-                System.out.println("Please enter command:");
-                String instruction = sc.nextLine();
-                parseAndExecuteInstruction(instruction);
-            }
-
-            sc.close();
+            userEmail = service.getEmailAddress();
+            print("Logged in as: " + userEmail);
+            Storage.getInstance(userEmail);
         } catch (Exception e) {
-            e.printStackTrace();
+            print("Unable to setup environment. Error: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    public static void main (String[] args) {
+        initialiseEnvironment();
+        Scanner sc = new Scanner(System.in);
+
+        while (isPendingInput) {
+            System.out.println("Please enter command:");
+            String instruction = sc.nextLine();
+            parseAndExecuteInstruction(instruction);
         }
 
+        sc.close();
     }
 }

@@ -16,10 +16,11 @@ import com.google.api.services.gmail.Gmail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 
 public class EmailBackup {
@@ -29,8 +30,7 @@ public class EmailBackup {
     Gmail service = null;
 
     /** Application name. */
-    private final String APPLICATION_NAME =
-        "Email Backup";
+    private final String APPLICATION_NAME = "Email Backup";
 
     /** Directory to store user credentials for this application. */
     private final java.io.File DATA_STORE_DIR = new java.io.File(
@@ -93,9 +93,6 @@ public class EmailBackup {
                 .build();
         Credential credential = new AuthorizationCodeInstalledApp(
             flow, new LocalServerReceiver()).authorize("user");
-        System.out.println(credential.getAccessToken());
-        System.out.println(
-                "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
         return credential;
     }
 
@@ -111,8 +108,7 @@ public class EmailBackup {
                 .build();
     }
 
-    private List<Message> listMessagesMatchingQuery(Gmail service, String userId,
-                                                          String query) throws IOException {
+    public List<Message> listMessagesMatchingQuery(String userId, String query) throws IOException {
         ListMessagesResponse response = service.users().messages().list(userId).setQ(query).execute();
 
         List<Message> messages = new ArrayList<Message>();
@@ -130,9 +126,24 @@ public class EmailBackup {
         return messages;
     }
 
+    public byte[] getMessageRaw(String id) throws IOException {
+        String user = "me";
+        Message m = service.users().messages().get(user, id).setFormat("raw").execute();
+        return m.decodeRaw();
+    }
+
     public String getEmailAddress() throws IOException {
         Profile response = service.users().getProfile("me").execute();
         return response.getEmailAddress();
+    }
+
+    private void removeCredentials() {
+        try {
+            Path file = Paths.get(DATA_STORE_DIR + "StoredCredential");
+            Files.delete(file);
+        } catch (Exception e) {
+            System.out.println("Unable to log out.");
+        }
     }
 
 //    public static void main(String[] args) throws IOException {
