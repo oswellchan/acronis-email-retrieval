@@ -1,3 +1,4 @@
+import java.io.FileReader;
 import java.util.HashMap;
 
 public class Storage {
@@ -19,5 +20,21 @@ public class Storage {
 
     public void updateIdToIVMap(String msgId, byte[] IV) {
         msgIdToIVMap.put(msgId, IV);
+    }
+
+    private boolean fileDoesNotExists(String fileName) {
+
+        boolean fileDoesNotExists = true;
+
+        try {
+            FileReader reader = new FileReader(fileName);
+            reader.close();
+
+            fileDoesNotExists = false;
+        } catch (Exception e) {
+
+        }
+
+        return fileDoesNotExists;
     }
 }
