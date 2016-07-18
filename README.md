@@ -15,7 +15,7 @@ Step 1: Turn on the Gmail API
 4. Select the application type **Other**, enter the name "Email Backup", and click the **Create** button.
 5. Click **OK** to dismiss the resulting dialog.
 6. Click the **file_download** (Download JSON) button to the right of the client ID.
-7. Move this file to `src/main/resources/` and rename it `client_secret.json`.
+7. Move this file to `src/main/resources/` (create directory) and rename it `client_secret.json`.
 
 ###Running Application
 At project folder, run with `gradle -q run`
