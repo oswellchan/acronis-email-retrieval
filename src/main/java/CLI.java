@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class CLI {
+    //Add new comment
     private static final String ERROR_INVALIDCOMMAND = "Invalid Command. Please try again.";
     private static final String ERROR_INVALIDSTARTDATEFORMAT = "Start date given is in invalid format. Corrrect format is yyyy/mm/dd. Please try again.";
     private static final String ERROR_INVALIDENDDATEFORMAT = "End date given is in invalid format. Corrrect format is yyyy/mm/dd. Please try again.";
